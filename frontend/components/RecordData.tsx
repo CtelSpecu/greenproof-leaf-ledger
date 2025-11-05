@@ -1,0 +1,198 @@
+"use client";
+
+import { Leaf, Cloud, Droplet, Zap, Lock, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useFhevm } from "@/fhevm/useFhevm";
+import { useInMemoryStorage } from "@/hooks/useInMemoryStorage";
+import { useMetaMaskEthersSigner } from "@/hooks/metamask/useMetaMaskEthersSigner";
+import { useFHECounter } from "@/hooks/useFHECounter";
+
+const dataTypes = [
+  { icon: Cloud, label: "CO₂ Reduction", unit: "tons", color: "text-forest" },
+  { icon: Zap, label: "Energy Saved", unit: "kWh", color: "text-gold" },
+  { icon: Droplet, label: "Water Conserved", unit: "liters", color: "text-blue-500" },
+  { icon: Leaf, label: "Waste Reduced", unit: "kg", color: "text-earth" },
+];
+
+const RecordData = () => {
+  const [selectedType, setSelectedType] = useState(0);
+  const [value, setValue] = useState("");
+  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
+  const {
+    provider,
+    chainId,
+    isConnected,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+    initialMockChains,
+  } = useMetaMaskEthersSigner();
+
+  const { instance: fhevmInstance } = useFhevm({
+    provider,
+    chainId,
+    initialMockChains,
+    enabled: true,
+  });
+
+  const fheCounter = useFHECounter({
+    instance: fhevmInstance,
+    fhevmDecryptionSignatureStorage,
+    eip1193Provider: provider,
+    chainId,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+  });
+
+  const handleSubmit = () => {
+    if (!isConnected) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
+    if (!value) {
+      alert("Please enter a value");
+      return;
+    }
+
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue) || numValue <= 0) {
+      alert("Please enter a valid positive number");
+      return;
+    }
+
+    // Use FHE encryption to increment counter
+    fheCounter.incOrDec(numValue);
+  };
+
+  return (
+    <section id="record" className="py-20">
+      <div className="container">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+            Record Your Impact
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Enter your verified environmental data to create an encrypted, blockchain-verified record
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="p-8 shadow-card border border-border/50 bg-card rounded-lg">
+            <div className="space-y-8">
+              <div>
+                <label className="text-base font-semibold mb-4 block">
+                  Select Data Type
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {dataTypes.map((type, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedType(index)}
+                      className={`p-4 rounded-lg border-2 transition-smooth hover:scale-105 ${
+                        selectedType === index
+                          ? "border-forest bg-forest/5 shadow-eco"
+                          : "border-border hover:border-forest/30"
+                      }`}
+                    >
+                      <type.icon className={`h-8 w-8 mx-auto mb-2 ${type.color}`} />
+                      <p className="text-sm font-medium text-center">
+                        {type.label}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="value" className="text-base font-semibold mb-2 block">
+                    Value ({dataTypes[selectedType].unit})
+                  </label>
+                  <input
+                    id="value"
+                    type="number"
+                    placeholder="0.00"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    className="w-full h-12 px-4 text-lg border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="date" className="text-base font-semibold mb-2 block">
+                    Verification Date
+                  </label>
+                  <input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full h-12 px-4 text-lg border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="notes" className="text-base font-semibold mb-2 block">
+                  Verification Notes (Optional)
+                </label>
+                <textarea
+                  id="notes"
+                  rows={4}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add any additional context or verification details..."
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border/50 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 transition-smooth bg-background"
+                />
+              </div>
+
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border border-border/30">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-forest/10 flex items-center justify-center">
+                  <Leaf className="h-5 w-5 text-forest" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your data will be encrypted before storage. Only authorized auditors with verification keys can decrypt this information.
+                </p>
+              </div>
+
+              <button 
+                onClick={handleSubmit}
+                disabled={!fheCounter.canIncOrDec}
+                className="w-full py-3 rounded-lg bg-forest hover:bg-forest-light text-primary-foreground transition-smooth shadow-eco disabled:opacity-50 font-medium flex items-center justify-center gap-2"
+              >
+                {fheCounter.isIncOrDec ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Encrypting & Recording...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-5 w-5" />
+                    Encrypt & Record Data
+                  </>
+                )}
+              </button>
+
+              {fheCounter.message && (
+                <div className="p-3 rounded-lg bg-muted/50 border border-border/30">
+                  <p className="text-sm text-muted-foreground font-mono">
+                    {fheCounter.message}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default RecordData;

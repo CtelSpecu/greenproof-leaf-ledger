@@ -1,11 +1,15 @@
-import { FHECounterDemo } from "@/components/FHECounterDemo";
+import Hero from "@/components/Hero";
+import HowItWorks from "@/components/HowItWorks";
+import RecordData from "@/components/RecordData";
+import VerifyData from "@/components/VerifyData";
 
 export default function Home() {
   return (
-    <main className="">
-      <div className="flex flex-col gap-8 items-center sm:items-start w-full px-3 md:px-0">
-        <FHECounterDemo />
-      </div>
-    </main>
+    <>
+      <Hero />
+      <HowItWorks />
+      <RecordData />
+      <VerifyData />
+    </>
   );
 }
