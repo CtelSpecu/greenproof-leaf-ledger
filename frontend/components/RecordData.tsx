@@ -132,6 +132,7 @@ const RecordData = () => {
                   <input
                     id="date"
                     type="date"
+                    lang="en"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     className="w-full h-12 px-4 text-lg border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"

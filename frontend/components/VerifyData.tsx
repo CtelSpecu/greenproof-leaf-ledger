@@ -11,7 +11,6 @@ const VerifyData = () => {
   const {
     provider,
     chainId,
-    isConnected,
     ethersSigner,
     ethersReadonlyProvider,
     sameChain,
@@ -36,11 +35,6 @@ const VerifyData = () => {
     sameChain,
     sameSigner,
   });
-
-  const formatHandle = (handle: string | undefined) => {
-    if (!handle) return "N/A";
-    return `${handle.slice(0, 10)}...${handle.slice(-8)}`;
-  };
 
   return (
     <section id="verify" className="py-20 bg-muted/30">
