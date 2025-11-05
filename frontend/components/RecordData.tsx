@@ -14,11 +14,22 @@ const dataTypes = [
   { icon: Leaf, label: "Waste Reduced", unit: "kg", color: "text-earth" },
 ];
 
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 const RecordData = () => {
   const [selectedType, setSelectedType] = useState(0);
   const [value, setValue] = useState("");
-  const [date, setDate] = useState("2025-11-07");
+  const [selectedMonth, setSelectedMonth] = useState(11);
+  const [selectedDay, setSelectedDay] = useState(7);
+  const [selectedYear, setSelectedYear] = useState(2025);
   const [notes, setNotes] = useState("");
+
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month, 0).getDate();
+  };
 
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
   const {
@@ -126,19 +137,38 @@ const RecordData = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="date" className="text-base font-semibold mb-2 block">
+                  <label className="text-base font-semibold mb-2 block">
                     Verification Date
                   </label>
-                  <input
-                    id="date"
-                    type="text"
-                    placeholder="MM/DD/YYYY"
-                    value={date}
-                    onFocus={(e) => { e.target.type = 'date'; }}
-                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full h-12 px-4 text-lg border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                      className="flex-1 h-12 px-3 text-base border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
+                    >
+                      {months.map((month, index) => (
+                        <option key={month} value={index + 1}>{month}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={selectedDay}
+                      onChange={(e) => setSelectedDay(Number(e.target.value))}
+                      className="w-20 h-12 px-3 text-base border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
+                    >
+                      {Array.from({ length: getDaysInMonth(selectedMonth, selectedYear) }, (_, i) => i + 1).map((day) => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className="w-24 h-12 px-3 text-base border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
+                    >
+                      {[2024, 2025, 2026].map((year) => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
