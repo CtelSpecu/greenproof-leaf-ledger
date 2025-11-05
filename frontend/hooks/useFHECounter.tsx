@@ -286,18 +286,27 @@ export const useFHECounter = (parameters: {
         !sameSigner.current(thisEthersSigner);
 
       try {
+        // 每次解密都需要新的钱包签名，不使用缓存
+        // Generate new keypair for each decryption request
+        const { publicKey, privateKey } = instance.generateKeypair();
+        
+        setMessage("Requesting wallet signature for decryption...");
+        
         const sig: FhevmDecryptionSignature | null =
-          await FhevmDecryptionSignature.loadOrSign(
+          await FhevmDecryptionSignature.new(
             instance,
             [fheCounter.address as `0x${string}`],
-            ethersSigner,
-            fhevmDecryptionSignatureStorage
+            publicKey,
+            privateKey,
+            ethersSigner
           );
 
         if (!sig) {
-          setMessage("Unable to build FHEVM decryption signature");
+          setMessage("Wallet signature rejected or failed");
           return;
         }
+        
+        setMessage("Signature obtained, decrypting...");
 
         if (isStale()) {
           setMessage("Ignore FHEVM decryption");
@@ -342,7 +351,6 @@ export const useFHECounter = (parameters: {
 
     run();
   }, [
-    fhevmDecryptionSignatureStorage,
     ethersSigner,
     fheCounter.address,
     instance,
