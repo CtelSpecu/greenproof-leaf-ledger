@@ -17,7 +17,7 @@ const dataTypes = [
 const RecordData = () => {
   const [selectedType, setSelectedType] = useState(0);
   const [value, setValue] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState("2025-11-07");
   const [notes, setNotes] = useState("");
 
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
@@ -131,9 +131,11 @@ const RecordData = () => {
                   </label>
                   <input
                     id="date"
-                    type="date"
-                    lang="en"
+                    type="text"
+                    placeholder="MM/DD/YYYY"
                     value={date}
+                    onFocus={(e) => { e.target.type = 'date'; }}
+                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
                     onChange={(e) => setDate(e.target.value)}
                     className="w-full h-12 px-4 text-lg border border-border/50 rounded-lg focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20 bg-background"
                   />
